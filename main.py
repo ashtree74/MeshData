@@ -20,7 +20,7 @@ class DataStream:
         Constructor with automatic data loader
         """
         self.file_name = file_name
-        self.data_stream = self.parse_data(self.load_data())
+        self.data_stream = self.load_data()
 
     def load_data(self):
         """
@@ -33,7 +33,7 @@ class DataStream:
         data.close()
         data_stream = readed_text.split(';\n')
         print '  {} records loaded.'.format(len(data_stream))
-        return data_stream
+        return self.parse_data(data_stream)
 
     def parse_data(self, data):
         """
@@ -69,10 +69,11 @@ class DataStream:
         :param rssi:
         :return: The distance converted from RSSI (in meters)
         """
-        tx_power = -50
+        TX_POWER = -50
+
         if rssi == 0:
             return -1
-        ratio = abs(rssi * 1.0 / tx_power)
+        ratio = abs(rssi * 1.0 / TX_POWER)
         if ratio < 1.0:
             return ratio ** 10
         else:
