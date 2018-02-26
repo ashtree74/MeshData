@@ -6,40 +6,42 @@ import plotly.plotly as py
 from plotly.graph_objs import *
 import datetime, math
 
+FILENAME = 'testData1.txt'
 
-class DataStream(object):
+
+class DataStream:
     """
     A few method to operate on raw data set.
     Purpose: convert data from "T=1:N=3:RSSI=-65;17:40:36;" to:
     {'node': 3, 'rssi': -51, 'tag': 1, 'dist': 4.396784253182812, 'ts': datetime.datetime(2018, 2, 20, 17, 40, 29)}
     """
-    def __init__(self):
+    def __init__(self, file_name):
         """
         Constructor with automatic data loader
         """
-        self.dataStream = self.parseData(self.loadData())
+        self.file_name = file_name
+        self.data_stream = self.parse_data(self.load_data())
 
-    def loadData(self):
+    def load_data(self):
         """
         Open a local disk file (raw data)
         :return: a list of raw records
         """
-        FILENAME = 'testData1.txt'
-        print("Loading data from file...")
-        inFile = open(FILENAME, 'r')
-        readed_text = inFile.read()
-        dataStream = readed_text.split(';\n')
-        print "  ", len(dataStream), "records loaded."
-        return dataStream
+        print 'Loading data from file ({})...'.format(self.file_name)
+        with open(self.file_name, 'r') as data:
+            readed_text = data.read()
+        data.close()
+        data_stream = readed_text.split(';\n')
+        print '  {} records loaded.'.format(len(data_stream))
+        return data_stream
 
-    def parseData(self, data):
+    def parse_data(self, data):
         """
         Parse raw data to structured dictionary
         :param data: raw list of records
         :return: parsed list of structured dictionary data
         """
         parsed_data = []
-        dist = CalculateDistance()
         for item in data:
             if item:
                 temp = {}
@@ -47,7 +49,7 @@ class DataStream(object):
                 temp['node'] = int(item.split(':')[1][-1])
                 rssi = int(item.split(':')[2].split(';')[0][5:])
                 temp['rssi'] = rssi
-                temp['dist'] = dist.calculateDistance(rssi)
+                temp['dist'] = self.calculate_distance(rssi)
                 temp['ts'] = datetime.datetime(2018, 02, 20, int(item.split(';')[1][:2]),
                                                int(item.split(';')[1][3:5]),
                                                int(item.split(';')[1][6:]))
@@ -59,26 +61,26 @@ class DataStream(object):
         Get a whole dataset of structured data
         :return: list of structured dictionary data
         """
-        return self.dataStream
+        return self.data_stream
 
-
-class CalculateDistance:
-
-    def calculateDistance(self, rssi):
+    def calculate_distance(self, rssi):
         """
         Convert RSSI to real world units (meters)
         :param rssi:
         :return: The distance converted from RSSI (in meters)
         """
-        txPower = -50
+        tx_power = -50
         if rssi == 0:
             return -1
-        ratio = abs(rssi * 1.0 / txPower)
+        ratio = abs(rssi * 1.0 / tx_power)
         if ratio < 1.0:
             return ratio ** 10
         else:
             distance = (3) * (ratio ** 4.595) + 1.111
             return distance
+
+    def __getitem__(self, item):
+        return self.getAllData()[item]
 
 
 class KalmanFilter:
@@ -110,15 +112,15 @@ class KalmanFilter:
             self.x = (1 / self.C) * measurement
             self.cov = (1 / self.C) * self.Q * (1 / self.C)
         else:
-            predX = (self.A * self.x) + (self.B * u)
-            predCov = ((self.A * self.cov) * self.A) + self.R
+            pred_x = (self.A * self.x) + (self.B * u)
+            pred_cov = ((self.A * self.cov) * self.A) + self.R
 
             # Kalman Gain
-            K = predCov * self.C * (1 / ((self.C * predCov * self.C) + self.Q));
+            k = pred_cov * self.C * (1 / ((self.C * pred_cov * self.C) + self.Q))
 
             # Correction
-            self.x = predX + K * (measurement - (self.C * predX));
-            self.cov = predCov - (K * self.C * predCov);
+            self.x = pred_x + k * (measurement - (self.C * pred_x))
+            self.cov = pred_cov - (k * self.C * pred_cov)
 
         return self.x
 
@@ -130,7 +132,7 @@ class VisualizeData:
     def __init__(self, data):
         self.data = data
 
-    def plotGraphAllRSSI(self):
+    def plot_graph_all_rssi(self):
         """
         Tracing raw RSSI data
         """
@@ -159,9 +161,8 @@ class VisualizeData:
         data = Data([node1, node2, node3])
 
         py.plot(data, filename='rssi-line')
-        return True
 
-    def plotGraphDistance(self, filtered=1):
+    def plot_graph_distance(self, filtered=1):
         """
         Trasing data converted to real world distances
         :param filtered: 1 Kalman filtered, 2 non-filtered
@@ -173,22 +174,20 @@ class VisualizeData:
             if item['node'] == 2:
                 data_x.append(item['ts'])
                 data_y.append(item['dist'])
-        node1 = Scatter(x=data_x, y=self.filterKalman(data_y))
+        node1 = Scatter(x=data_x, y=self.filter_kalman(data_y))
 
         data_x, data_y = [], []
         for item in data:
             if item['node'] == 3:
                 data_x.append(item['ts'])
                 data_y.append(item['dist'])
-        node2 = Scatter(x=data_x, y=self.filterKalman(data_y))
+        node2 = Scatter(x=data_x, y=self.filter_kalman(data_y))
 
         data = Data([node1, node2])
 
         py.plot(data, filename='distance-line')
-        return True
 
-
-    def filterKalman(self, data, a=0.008, b=0.1):
+    def filter_kalman(self, data, a=0.008, b=0.1):
         """
         Kalman filtering on a set of data
         :param data: list of raw data
@@ -203,5 +202,5 @@ class VisualizeData:
         return data_filtered
 
 
-app = DataStream()
-visualize = VisualizeData(app.getAllData()).plotGraphDistance()
+app = DataStream(FILENAME)
+visualize = VisualizeData(app).plot_graph_distance()
