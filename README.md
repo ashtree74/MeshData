@@ -4,6 +4,6 @@ The application of Kalman Filtering to the analysis of baseline 1D location data
 
 ![Picture](/Pictures/distance-line-filtered.png?raw=true "Original unfiltered uncalculated data")
 
-![Picture](/Pictures/distance-line-kalman.png?raw=true "Filtered data")
+![Picture](/Pictures/rssi-line_raw.png?raw=true "Filtered data")
 
-![Picture](/Pictures/rssi-line_raw.png?raw=true "2 nodes - Kalman filtered data")
+![Picture](/Pictures/distance-line-kalman.png?raw=true "2 nodes - Kalman filtered data")
