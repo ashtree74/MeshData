@@ -2,7 +2,7 @@
 # of baseline 1D location data (BLE RSSIs)
 # by Jesion
 
-import plotly.plotly as py
+import plotly.plotly
 from plotly.graph_objs import *
 import datetime, math
 
@@ -41,6 +41,7 @@ class DataStream:
         :param data: raw list of records
         :return: parsed list of structured dictionary data
         """
+        # TODO replace with regex
         parsed_data = []
         for item in data:
             if item:
@@ -130,6 +131,7 @@ class VisualizeData:
     """
     Plot data on the diagram (plot.ly)
     """
+    # TODO rewrite whole class
     def __init__(self, data):
         self.data = data
 
@@ -161,7 +163,7 @@ class VisualizeData:
 
         data = Data([node1, node2, node3])
 
-        py.plot(data, filename='rssi-line')
+        plotly.plotly.plot(data, filename='rssi-line')
 
     def plot_graph_distance(self, filtered=1):
         """
@@ -186,7 +188,7 @@ class VisualizeData:
 
         data = Data([node1, node2])
 
-        py.plot(data, filename='distance-line')
+        plotly.plotly.plot(data, filename='distance-line')
 
     def filter_kalman(self, data, a=0.008, b=0.1):
         """
@@ -203,4 +205,5 @@ class VisualizeData:
         return data_filtered
 
 
-VisualizeData(DataStream(FILENAME)).plot_graph_distance()
+if __name__ == '__main__':
+    VisualizeData(DataStream(FILENAME)).plot_graph_distance()
