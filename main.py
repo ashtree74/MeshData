@@ -1,4 +1,5 @@
-# Data analytics with Kalman filtering
+# The application of Kalman Filtering to the analysis
+# of baseline 1D location data (BLE RSSIs)
 # by Jesion
 
 import plotly.plotly as py
@@ -20,7 +21,7 @@ class DataStream(object):
 
     def loadData(self):
         """
-        Load file from the disk
+        Open a local disk file (raw data)
         :return: a list of raw records
         """
         FILENAME = 'testData1.txt'
@@ -65,7 +66,7 @@ class CalculateDistance:
 
     def calculateDistance(self, rssi):
         """
-        Convert RSSI to real world meters
+        Convert RSSI to real world units (meters)
         :param rssi:
         :return: The distance converted from RSSI (in meters)
         """
@@ -131,7 +132,7 @@ class VisualizeData:
 
     def plotGraphAllRSSI(self):
         """
-        Showing raw RSSI data
+        Tracing raw RSSI data
         """
         data = self.data
         data_x, data_y = [], []
@@ -162,7 +163,7 @@ class VisualizeData:
 
     def plotGraphDistance(self, filtered=1):
         """
-        Showing data converted to real world distances
+        Trasing data converted to real world distances
         :param filtered: 1 Kalman filtered, 2 non-filtered
         :return: True if everything was OK, False otherwise
         """
