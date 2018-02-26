@@ -56,7 +56,7 @@ class DataStream:
                 parsed_data.append(temp)
         return parsed_data
 
-    def getAllData(self):
+    def get_data(self):
         """
         Get a whole dataset of structured data
         :return: list of structured dictionary data
@@ -80,7 +80,7 @@ class DataStream:
             return distance
 
     def __getitem__(self, item):
-        return self.getAllData()[item]
+        return self.get_data()[item]
 
 
 class KalmanFilter:
