@@ -202,5 +202,4 @@ class VisualizeData:
         return data_filtered
 
 
-app = DataStream(FILENAME)
-visualize = VisualizeData(app).plot_graph_distance()
+VisualizeData(DataStream(FILENAME)).plot_graph_distance()
