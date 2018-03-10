@@ -4,7 +4,7 @@
 
 import plotly.plotly
 from plotly.graph_objs import *
-import datetime, math
+import datetime, math, re
 import logging
 import unittest
 import argparse
@@ -51,7 +51,7 @@ class DataStream():
         self.R = FILTER_R
         self.Q = FILTER_Q
 
-        self.data_stream = self.load_data()
+        self.data_stream = []
 
     def load_data(self):
         """
@@ -63,7 +63,7 @@ class DataStream():
             readed_text = data.read()
         readed_text = readed_text.split(';\n')
         logging.debug('  {} records loaded.'.format(len(readed_text)))
-        return self.parse_data(readed_text)
+        self.data_stream = self.parse_data(readed_text)
 
     def parse_data(self, data):
         """
@@ -71,23 +71,20 @@ class DataStream():
         :param data: raw list of records
         :return: parsed list of structured dictionary data
         """
-        # TODO replace with regex
-        parsed_data = []
+        parsed_data = list()
         for item in data:
-            if item:
-                temp = {}
-                temp['tag'] = int(item.split(':')[0][-1])
-                temp['node'] = int(item.split(':')[1][-1])
-                rssi = int(item.split(':')[2].split(';')[0][5:])
-                temp['rssi'] = rssi
-                temp['dist'] = self.calculate_distance(rssi)
-                temp['ts'] = datetime.datetime(2018, 02, 20, int(item.split(';')[1][:2]),
-                                               int(item.split(';')[1][3:5]),
-                                               int(item.split(';')[1][6:]))
+            match = re.match('^T=(?P<tag>-?\d*):N=(?P<node>-?\d*):RSSI=(?P<rssi>-?\d*);(?P<ts>\d*:\d*:\d*)', item)
+            if match:
+                temp = match.groupdict()
+                temp = {key: value if key == 'ts' else int(value) for key, value in temp.items()}
+                hour, minute, second = temp['ts'].split(':')
+                temp['ts'] = datetime.datetime(2018, 3, 10, int(hour), int(minute), int(second))
+                temp['dist'] = self.calculate_distance(temp['rssi'])
                 parsed_data.append(temp)
 
         # Applying filter to specific nodes
         for node in range(1, NODES_NB + 1):
+            # TODO Implement list comprehension
             for item in parsed_data:
                 if item['node'] == node:
                     item['f_dist'] = self.kalman_filter(item['dist'])
@@ -143,8 +140,15 @@ class DataStream():
             distance = calibrator_1 * (ratio ** ratio_power) + calibrator_2
             return distance
 
+    def get_data(self):
+        if self.data_stream:
+            return self.data_stream
+        else:
+            self.load_data()
+            return self.data_stream
+
     def __getitem__(self, item):
-        return self.data_stream[item]
+        return self.get_data()[item]
 
 
 class VisualizeData():
