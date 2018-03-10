@@ -120,15 +120,20 @@ class DataStream(object):
         :param rssi:
         :return: The distance converted from RSSI (in meters)
         """
-        TX_POWER = -50
+        tx_power = -50
+
+        # Calibrating data curve to real measurement
+        ratio_power = 4.595
+        calibrator_1 = 3
+        calibrator_2 = 1.111
 
         if rssi == 0:
             return -1
-        ratio = abs(rssi * 1.0 / TX_POWER)
+        ratio = abs(rssi * 1.0 / tx_power)
         if ratio < 1.0:
             return ratio ** 10
         else:
-            distance = (3) * (ratio ** 4.595) + 1.111
+            distance = calibrator_1 * (ratio ** ratio_power) + calibrator_2
             return distance
 
     def __getitem__(self, item):
