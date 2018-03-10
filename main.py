@@ -7,6 +7,7 @@ from plotly.graph_objs import *
 import datetime, math
 import logging
 import unittest
+import argparse
 
 logging.basicConfig(
     filename="debug.log",
@@ -14,7 +15,14 @@ logging.basicConfig(
     format="%(asctime)s:%(levelname)s:%(message)s"
     )
 
-FILENAME = 'testData1.txt'
+parser = argparse.ArgumentParser()
+parser.add_argument("file_name", help="you must provide a file name with raw data (T=1:N=3:RSSI=-65;17:40:36;)",
+                    type=str)
+args = parser.parse_args()
+FILENAME = args.file_name
+logging.debug('File name: {}'.format(FILENAME))
+
+# FILENAME = 'testData1.txt'
 NODES_NB = 3
 
 # Filter parameters
@@ -22,7 +30,7 @@ FILTER_R = 0.008
 FILTER_Q = 0.1
 
 
-class DataStream(object):
+class DataStream():
     """
     A few method to operate on raw data set.
     Purpose: convert data from "T=1:N=3:RSSI=-65;17:40:36;" to:
@@ -73,7 +81,6 @@ class DataStream(object):
                 rssi = int(item.split(':')[2].split(';')[0][5:])
                 temp['rssi'] = rssi
                 temp['dist'] = self.calculate_distance(rssi)
-                # temp['f_dist'] = self.kalman_filter(self.calculate_distance(rssi))
                 temp['ts'] = datetime.datetime(2018, 02, 20, int(item.split(';')[1][:2]),
                                                int(item.split(';')[1][3:5]),
                                                int(item.split(';')[1][6:]))
@@ -93,7 +100,7 @@ class DataStream(object):
 
     def kalman_filter(self, measurement):
         """
-        Filters a measurement
+        Filters a measurement. More: https://en.wikipedia.org/wiki/Kalman_filter
         :param measurement: The measurement value to be filtered
         :return: The filtered value
         """
