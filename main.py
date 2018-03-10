@@ -91,13 +91,6 @@ class DataStream(object):
 
         return parsed_data
 
-    def get_data(self):
-        """
-        Get a whole dataset of structured data
-        :return: list of structured dictionary data
-        """
-        return self.data_stream
-
     def kalman_filter(self, measurement):
         """
         Filters a measurement
@@ -139,7 +132,7 @@ class DataStream(object):
             return distance
 
     def __getitem__(self, item):
-        return self.get_data()[item]
+        return self.data_stream[item]
 
 
 class VisualizeData():
@@ -174,7 +167,7 @@ class TestData(unittest.TestCase):
 
     def test_loader(self):
         data = DataStream(FILENAME)
-        self.assertGreater(len(data.get_data()), 1)
+        self.assertGreater(len(data.data_stream), 1)
 
     def test_parser(self):
         data = DataStream(FILENAME)
@@ -190,6 +183,6 @@ class TestData(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
     VisualizeData(DataStream(FILENAME)).plot_graph('f_dist')
     logging.debug('----------------Program ended OK!')
