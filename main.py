@@ -53,9 +53,9 @@ class DataStream(object):
         logging.debug('Loading data from file ({})...'.format(self.file_name))
         with open(self.file_name, 'r') as data:
             readed_text = data.read()
-        data_stream = readed_text.split(';\n')
-        logging.debug('  {} records loaded.'.format(len(data_stream)))
-        return self.parse_data(data_stream)
+        readed_text = readed_text.split(';\n')
+        logging.debug('  {} records loaded.'.format(len(readed_text)))
+        return self.parse_data(readed_text)
 
     def parse_data(self, data):
         """
@@ -190,6 +190,6 @@ class TestData(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # unittest.main()
+    unittest.main()
     VisualizeData(DataStream(FILENAME)).plot_graph('f_dist')
     logging.debug('----------------Program ended OK!')
