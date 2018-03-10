@@ -169,31 +169,6 @@ class VisualizeData():
         data = Data(nodes)
         plotly.plotly.plot(data, filename=dataset+'-line')
 
-    def plot_graph_distance(self):
-        """
-        Trasing data converted to real world distances
-        :param filtered: 1 Kalman filtered, 2 non-filtered
-        :return: True if everything was OK, False otherwise
-        """
-        data = self.data
-        data_x, data_y = [], []
-        for item in data:
-            if item['node'] == 2:
-                data_x.append(item['ts'])
-                data_y.append(item['f_dist'])
-        node1 = Scatter(x=data_x, y=data_y)
-
-        data_x, data_y = [], []
-        for item in data:
-            if item['node'] == 3:
-                data_x.append(item['ts'])
-                data_y.append(item['f_dist'])
-        node2 = Scatter(x=data_x, y=data_y)
-
-        data = Data([node1, node2])
-
-        plotly.plotly.plot(data, filename='distance-line')
-
 
 class TestData(unittest.TestCase):
 
@@ -216,5 +191,5 @@ class TestData(unittest.TestCase):
 
 if __name__ == '__main__':
     # unittest.main()
-    VisualizeData(DataStream(FILENAME)).plot_graph('dist')
+    VisualizeData(DataStream(FILENAME)).plot_graph('f_dist')
     logging.debug('----------------Program ended OK!')
