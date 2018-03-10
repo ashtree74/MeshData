@@ -9,19 +9,6 @@ import logging
 import unittest
 import argparse
 
-logging.basicConfig(
-    filename="debug.log",
-    level=logging.DEBUG,
-    format="%(asctime)s:%(levelname)s:%(message)s"
-    )
-
-parser = argparse.ArgumentParser()
-parser.add_argument("file_name", help="you must provide a file name with raw data (T=1:N=3:RSSI=-65;17:40:36;)",
-                    type=str)
-args = parser.parse_args()
-FILENAME = args.file_name
-logging.debug('File name: {}'.format(FILENAME))
-
 # FILENAME = 'testData1.txt'
 NODES_NB = 3
 
@@ -81,6 +68,9 @@ class DataStream():
                 temp['ts'] = datetime.datetime(2018, 3, 10, int(hour), int(minute), int(second))
                 temp['dist'] = self.calculate_distance(temp['rssi'])
                 parsed_data.append(temp)
+
+        if not parsed_data:
+            logging.debug('...Something wrong with the file!')
 
         # Applying filter to specific nodes
         for node in range(1, NODES_NB + 1):
@@ -183,10 +173,10 @@ class TestData(unittest.TestCase):
 
     def test_loader(self):
         data = DataStream(FILENAME)
-        self.assertGreater(len(data.data_stream), 1)
+        self.assertGreater(len(data.get_data()), 1)
 
     def test_parser(self):
-        data = DataStream(FILENAME)
+        data = DataStream(FILENAME).get_data()
         self.assertEqual(data[0].keys(), ['node', 'dist', 'f_dist', 'ts', 'tag', 'rssi'])
 
     def test_filter(self):
@@ -199,6 +189,25 @@ class TestData(unittest.TestCase):
 
 
 if __name__ == '__main__':
+
+    logging.basicConfig(
+        filename="debug.log",
+        level=logging.DEBUG,
+        format="%(asctime)s:%(levelname)s:%(message)s"
+    )
+
+    # Argument parsing
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file_name", help="you must provide a file name with raw data (T=1:N=3:RSSI=-65;17:40:36;)",
+                        type=str)
+    args = parser.parse_args()
+    FILENAME = args.file_name
+    logging.debug('File name: {}'.format(FILENAME))
+
+    # # Execute test cases
+    # FILENAME = 'testData1.txt'
     # unittest.main()
+
+    # Run
     VisualizeData(DataStream(FILENAME)).plot_graph('f_dist')
     logging.debug('----------------Program ended OK!')
